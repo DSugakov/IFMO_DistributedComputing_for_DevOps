@@ -151,6 +151,37 @@
         files:
           - docker-compose.yml
         state: present
+        services:
+          - node1
+      become: true
+
+    - name: Ожидание запуска мастер-узла MySQL
+      ansible.builtin.pause:
+        seconds: 10
+        prompt: "Ожидаем запуска мастер-узла MySQL..."
+
+    - name: Запуск узлов-реплик MySQL
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - docker-compose.yml
+        state: present
+        services:
+          - node2
+          - node3
+      become: true
+      
+    - name: Ожидание запуска реплик MySQL
+      ansible.builtin.pause:
+        seconds: 10
+        prompt: "Ожидаем запуска узлов-реплик MySQL..."
+
+    - name: Запуск остальных сервисов основного стека
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - docker-compose.yml
+        state: present
       become: true
 
     - name: Шаблонизировать docker-compose-monitoring.yml

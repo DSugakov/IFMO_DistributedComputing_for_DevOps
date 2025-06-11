@@ -78,8 +78,8 @@ services:
 
   mysqld_exporter_node1:
     image: prom/mysqld-exporter:latest
-    environment:
-      - DATA_SOURCE_NAME={{ mysql_user }}:{{ mysql_password }}@(node1:3306)/
+    volumes:
+      - ./mysqld_exporter_node1.cnf:/root/.my.cnf
     depends_on:
       - node1
     networks:
@@ -87,8 +87,8 @@ services:
 
   mysqld_exporter_node2:
     image: prom/mysqld-exporter:latest
-    environment:
-      - DATA_SOURCE_NAME={{ mysql_user }}:{{ mysql_password }}@(node2:3306)/
+    volumes:
+      - ./mysqld_exporter_node2.cnf:/root/.my.cnf
     depends_on:
       - node2
     networks:
@@ -96,8 +96,8 @@ services:
 
   mysqld_exporter_node3:
     image: prom/mysqld-exporter:latest
-    environment:
-      - DATA_SOURCE_NAME={{ mysql_user }}:{{ mysql_password }}@(node3:3306)/
+    volumes:
+      - ./mysqld_exporter_node3.cnf:/root/.my.cnf
     depends_on:
       - node3
     networks:

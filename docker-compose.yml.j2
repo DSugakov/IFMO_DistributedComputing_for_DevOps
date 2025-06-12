@@ -69,11 +69,14 @@ services:
     networks:
       - wp_network
 
-volumes:
-  mysql_node1_data:
-  mysql_node2_data:
-  mysql_node3_data:
-  wordpress_data:
+  mysqld_exporter:
+    image: prom/mysqld-exporter:v0.14.0
+    environment:
+      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@tcp(node1:3306)/
+    depends_on:
+      - node1
+    networks:
+      - wp_network
 
 networks:
   wp_network:

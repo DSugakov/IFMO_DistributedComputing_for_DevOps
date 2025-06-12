@@ -1,50 +1,119 @@
-mysqld_exporter_node1:
-  image: prom/mysqld-exporter:latest
-  restart: always
-  entrypoint:
-    - /bin/mysqld_exporter
-    - --collect.info_schema.innodb_metrics
-    - --collect.global_status
-    - --collect.info_schema.innodb_tablespaces
-    - --collect.info_schema.query_response_time
-    - --collect.global_variables
-  environment:
-    - DATA_SOURCE_NAME=root:root_password@tcp(node1:3306)/
-  depends_on:
-    - node1
-  networks:
-    - wp_network
+services:
+  node1:
+    image: 'bitnami/mysql:8.0'
+    environment:
+      - MYSQL_ROOT_PASSWORD={{ mysql_root_password }}
+      - MYSQL_DATABASE={{ mysql_database }}
+      - MYSQL_USER={{ mysql_user }}
+      - MYSQL_PASSWORD={{ mysql_password }}
+    volumes:
+      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./mysql_node1_data:/bitnami/mysql/data
+    networks:
+      - wp_network
 
-mysqld_exporter_node2:
-  image: prom/mysqld-exporter:latest
-  restart: always
-  entrypoint:
-    - /bin/mysqld_exporter
-    - --collect.info_schema.innodb_metrics
-    - --collect.global_status
-    - --collect.info_schema.innodb_tablespaces
-    - --collect.info_schema.query_response_time
-    - --collect.global_variables
-  environment:
-    - DATA_SOURCE_NAME=root:root_password@tcp(node2:3306)/
-  depends_on:
-    - node2
-  networks:
-    - wp_network
+  node2:
+    image: 'bitnami/mysql:8.0'
+    environment:
+      - MYSQL_ROOT_PASSWORD={{ mysql_root_password }}
+    volumes:
+      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./mysql_node2_data:/bitnami/mysql/data
+    depends_on:
+      - node1
+    networks:
+      - wp_network
 
-mysqld_exporter_node3:
-  image: prom/mysqld-exporter:latest
-  restart: always
-  entrypoint:
-    - /bin/mysqld_exporter
-    - --collect.info_schema.innodb_metrics
-    - --collect.global_status
-    - --collect.info_schema.innodb_tablespaces
-    - --collect.info_schema.query_response_time
-    - --collect.global_variables
-  environment:
-    - DATA_SOURCE_NAME=root:root_password@tcp(node3:3306)/
-  depends_on:
-    - node3
-  networks:
-    - wp_network 
+  node3:
+    image: 'bitnami/mysql:8.0'
+    environment:
+      - MYSQL_ROOT_PASSWORD={{ mysql_root_password }}
+    volumes:
+      - ./mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./mysql_node3_data:/bitnami/mysql/data
+    depends_on:
+      - node1
+    networks:
+      - wp_network
+
+  wordpress:
+    image: 'bitnami/wordpress:6'
+    ports:
+      - '8080:8080'
+    environment:
+      - WORDPRESS_DATABASE_HOST=node1
+      - WORDPRESS_DATABASE_PORT_NUMBER=3306
+      - WORDPRESS_DATABASE_USER={{ mysql_user }}
+      - WORDPRESS_DATABASE_NAME={{ mysql_database }}
+      - WORDPRESS_DATABASE_PASSWORD={{ mysql_password }}
+    depends_on:
+      - node1
+      - node2
+      - node3
+    networks:
+      - wp_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - wp_network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3000:3000'
+    networks:
+      - wp_network
+
+  mysqld_exporter_node1:
+    image: prom/mysqld-exporter:latest
+    environment:
+      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@(node1:3306)/
+    command:
+      - '--collect.info_schema.innodb_metrics'
+      - '--collect.info_schema.innodb_tablespaces'
+      - '--collect.info_schema.query_response_time'
+      - '--collect.global_status'
+      - '--collect.global_variables'
+    depends_on:
+      - node1
+    networks:
+      - wp_network
+
+  mysqld_exporter_node2:
+    image: prom/mysqld-exporter:latest
+    environment:
+      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@(node2:3306)/
+    command:
+      - '--collect.info_schema.innodb_metrics'
+      - '--collect.info_schema.innodb_tablespaces'
+      - '--collect.info_schema.query_response_time'
+      - '--collect.global_status'
+      - '--collect.global_variables'
+    depends_on:
+      - node2
+    networks:
+      - wp_network
+
+  mysqld_exporter_node3:
+    image: prom/mysqld-exporter:latest
+    environment:
+      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@(node3:3306)/
+    command:
+      - '--collect.info_schema.innodb_metrics'
+      - '--collect.info_schema.innodb_tablespaces'
+      - '--collect.info_schema.query_response_time'
+      - '--collect.global_status'
+      - '--collect.global_variables'
+    depends_on:
+      - node3
+    networks:
+      - wp_network
+
+networks:
+  wp_network:
+    driver: bridge 

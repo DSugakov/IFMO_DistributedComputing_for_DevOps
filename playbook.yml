@@ -193,18 +193,4 @@
           - docker-compose.yml
         state: present
       become: true
-
-    - name: Шаблонизировать docker-compose-monitoring.yml
-      ansible.builtin.template:
-        src: monitoring-docker-compose.yml.j2
-        dest: "{{ project_dir }}/docker-compose-monitoring.yml"
-        mode: "0o644"
-
-    - name: Управление стеком мониторинга
-      community.docker.docker_compose_v2:
-        project_src: "{{ project_dir }}"
-        files:
-          - docker-compose-monitoring.yml
-        state: present
-      become: true
  

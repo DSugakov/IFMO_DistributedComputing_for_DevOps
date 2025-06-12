@@ -70,45 +70,33 @@ services:
       - wp_network
 
   mysqld_exporter_node1:
-    image: prom/mysqld-exporter:latest
+    image: prom/mysqld-exporter:v0.14.0
+    ports:
+      - '9104:9104'
     environment:
-      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@(node1:3306)/
-    command:
-      - '--collect.info_schema.innodb_metrics'
-      - '--collect.info_schema.innodb_tablespaces'
-      - '--collect.info_schema.query_response_time'
-      - '--collect.global_status'
-      - '--collect.global_variables'
+      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@tcp(node1:3306)/
     depends_on:
       - node1
     networks:
       - wp_network
 
   mysqld_exporter_node2:
-    image: prom/mysqld-exporter:latest
+    image: prom/mysqld-exporter:v0.14.0
+    ports:
+      - '9105:9104'
     environment:
-      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@(node2:3306)/
-    command:
-      - '--collect.info_schema.innodb_metrics'
-      - '--collect.info_schema.innodb_tablespaces'
-      - '--collect.info_schema.query_response_time'
-      - '--collect.global_status'
-      - '--collect.global_variables'
+      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@tcp(node2:3306)/
     depends_on:
       - node2
     networks:
       - wp_network
 
   mysqld_exporter_node3:
-    image: prom/mysqld-exporter:latest
+    image: prom/mysqld-exporter:v0.14.0
+    ports:
+      - '9106:9104'
     environment:
-      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@(node3:3306)/
-    command:
-      - '--collect.info_schema.innodb_metrics'
-      - '--collect.info_schema.innodb_tablespaces'
-      - '--collect.info_schema.query_response_time'
-      - '--collect.global_status'
-      - '--collect.global_variables'
+      - DATA_SOURCE_NAME=root:{{ mysql_root_password }}@tcp(node3:3306)/
     depends_on:
       - node3
     networks:

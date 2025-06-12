@@ -1,13 +1,15 @@
 mysqld_exporter_node1:
   image: prom/mysqld-exporter:latest
+  restart: always
+  entrypoint:
+    - /bin/mysqld_exporter
+    - --collect.info_schema.innodb_metrics
+    - --collect.global_status
+    - --collect.info_schema.innodb_tablespaces
+    - --collect.info_schema.query_response_time
+    - --collect.global_variables
   environment:
     - DATA_SOURCE_NAME=root:root_password@tcp(node1:3306)/
-  command:
-    - '--collect.info_schema.innodb_metrics'
-    - '--collect.info_schema.innodb_tablespaces'
-    - '--collect.info_schema.query_response_time'
-    - '--collect.global_status'
-    - '--collect.global_variables'
   depends_on:
     - node1
   networks:
@@ -15,14 +17,16 @@ mysqld_exporter_node1:
 
 mysqld_exporter_node2:
   image: prom/mysqld-exporter:latest
+  restart: always
+  entrypoint:
+    - /bin/mysqld_exporter
+    - --collect.info_schema.innodb_metrics
+    - --collect.global_status
+    - --collect.info_schema.innodb_tablespaces
+    - --collect.info_schema.query_response_time
+    - --collect.global_variables
   environment:
     - DATA_SOURCE_NAME=root:root_password@tcp(node2:3306)/
-  command:
-    - '--collect.info_schema.innodb_metrics'
-    - '--collect.info_schema.innodb_tablespaces'
-    - '--collect.info_schema.query_response_time'
-    - '--collect.global_status'
-    - '--collect.global_variables'
   depends_on:
     - node2
   networks:
@@ -30,14 +34,16 @@ mysqld_exporter_node2:
 
 mysqld_exporter_node3:
   image: prom/mysqld-exporter:latest
+  restart: always
+  entrypoint:
+    - /bin/mysqld_exporter
+    - --collect.info_schema.innodb_metrics
+    - --collect.global_status
+    - --collect.info_schema.innodb_tablespaces
+    - --collect.info_schema.query_response_time
+    - --collect.global_variables
   environment:
     - DATA_SOURCE_NAME=root:root_password@tcp(node3:3306)/
-  command:
-    - '--collect.info_schema.innodb_metrics'
-    - '--collect.info_schema.innodb_tablespaces'
-    - '--collect.info_schema.query_response_time'
-    - '--collect.global_status'
-    - '--collect.global_variables'
   depends_on:
     - node3
   networks:

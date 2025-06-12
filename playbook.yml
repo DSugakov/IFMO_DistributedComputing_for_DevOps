@@ -131,16 +131,6 @@
         group: "{{ ansible_user }}"
         mode: "0o644"
 
-    - name: Create mysqld_exporter config files
-      ansible.builtin.template:
-        src: mysqld_exporter.cnf.j2
-        dest: "{{ project_dir }}/mysqld_exporter_{{ item }}.cnf"
-        mode: "0o644"
-      loop:
-        - node1
-        - node2
-        - node3
-
     - name: Шаблонизировать docker-compose.yml
       ansible.builtin.template:
         src: docker-compose.yml.j2

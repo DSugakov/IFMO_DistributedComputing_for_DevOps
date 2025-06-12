@@ -80,7 +80,6 @@ services:
     image: prom/mysqld-exporter:latest
     environment:
       - DATA_SOURCE_NAME=root:root_password@tcp(node1:3306)/
-    command: ["--collect.info_schema.tables", "--collect.info_schema.innodb_metrics", "--collect.global_status", "--collect.global_variables", "--collect.slave_status", "--collect.info_schema.processlist", "--collect.auto_increment.columns", "--collect.info_schema.innodb_tablespaces", "--collect.info_schema.tables.databases=wordpress"]
     depends_on:
       - node1
     networks:
@@ -90,7 +89,6 @@ services:
     image: prom/mysqld-exporter:latest
     environment:
       - DATA_SOURCE_NAME=root:root_password@tcp(node2:3306)/
-    command: ["--collect.info_schema.tables", "--collect.info_schema.innodb_metrics", "--collect.global_status", "--collect.global_variables", "--collect.slave_status", "--collect.info_schema.processlist", "--collect.auto_increment.columns", "--collect.info_schema.innodb_tablespaces", "--collect.info_schema.tables.databases=wordpress"]
     depends_on:
       - node2
     networks:
@@ -100,7 +98,6 @@ services:
     image: prom/mysqld-exporter:latest
     environment:
       - DATA_SOURCE_NAME=root:root_password@tcp(node3:3306)/
-    command: ["--collect.info_schema.tables", "--collect.info_schema.innodb_metrics", "--collect.global_status", "--collect.global_variables", "--collect.slave_status", "--collect.info_schema.processlist", "--collect.auto_increment.columns", "--collect.info_schema.innodb_tablespaces", "--collect.info_schema.tables.databases=wordpress"]
     depends_on:
       - node3
     networks:

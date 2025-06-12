@@ -77,27 +77,30 @@ services:
       - wp_network
 
   mysqld_exporter_node1:
-    image: prom/mysqld-exporter:v0.12.1
-    environment:
-      - DATA_SOURCE_NAME=root:root_password@tcp(node1:3306)/
+    image: prom/mysqld-exporter:latest
+    volumes:
+      - ./mysqld_exporter_node1.cnf:/etc/mysqld-exporter/mysqld-exporter.cnf
+    command: ["--config.my-cnf=/etc/mysqld-exporter/mysqld-exporter.cnf"]
     depends_on:
       - node1
     networks:
       - wp_network
 
   mysqld_exporter_node2:
-    image: prom/mysqld-exporter:v0.12.1
-    environment:
-      - DATA_SOURCE_NAME=root:root_password@tcp(node2:3306)/
+    image: prom/mysqld-exporter:latest
+    volumes:
+      - ./mysqld_exporter_node2.cnf:/etc/mysqld-exporter/mysqld-exporter.cnf
+    command: ["--config.my-cnf=/etc/mysqld-exporter/mysqld-exporter.cnf"]
     depends_on:
       - node2
     networks:
       - wp_network
 
   mysqld_exporter_node3:
-    image: prom/mysqld-exporter:v0.12.1
-    environment:
-      - DATA_SOURCE_NAME=root:root_password@tcp(node3:3306)/
+    image: prom/mysqld-exporter:latest
+    volumes:
+      - ./mysqld_exporter_node3.cnf:/etc/mysqld-exporter/mysqld-exporter.cnf
+    command: ["--config.my-cnf=/etc/mysqld-exporter/mysqld-exporter.cnf"]
     depends_on:
       - node3
     networks:

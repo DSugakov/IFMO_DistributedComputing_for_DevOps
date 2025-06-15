@@ -7,7 +7,7 @@ chown "${APP_USER}:${APP_USER}" "${MONITORING_DIR}"
 
 # Копируем и настраиваем файлы
 cp monitoring-docker-compose.yml.j2 "${MONITORING_DIR}/docker-compose.yml"
-cp prometheus-config.yml.j2 "${MONITORING_DIR}/prometheus.yml"
+cp prometheus.yml.j2 "${MONITORING_DIR}/prometheus.yml"
 
 # Устанавливаем права
 chmod 644 "${MONITORING_DIR}/docker-compose.yml"

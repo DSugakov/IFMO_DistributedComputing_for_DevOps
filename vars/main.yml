@@ -18,6 +18,8 @@ mysql_root_password: "root_password"
 mysql_database: "wordpress"
 mysql_user: "wordpress"
 mysql_password: "wordpress_password"
+mysql_replication_user: "repl"
+mysql_replication_password: "repl_password"
 cluster_name: "wp_cluster"
 cluster_nodes:
   - name: "node1"

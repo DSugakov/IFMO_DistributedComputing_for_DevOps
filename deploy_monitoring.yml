@@ -24,7 +24,7 @@
 
     - name: Template prometheus config
       ansible.builtin.template:
-        src: prometheus-config.yml.j2
+        src: prometheus.yml.j2
         dest: "{{ monitoring_dir }}/prometheus.yml"
         owner: "{{ app_user }}"
         group: "{{ app_user }}"

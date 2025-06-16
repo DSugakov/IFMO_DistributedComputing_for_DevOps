@@ -89,7 +89,7 @@
       ansible.builtin.file:
         path: "{{ project_dir }}/{{ item }}"
         state: directory
-        mode: "0o755"
+        mode: "0o777"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
       loop:

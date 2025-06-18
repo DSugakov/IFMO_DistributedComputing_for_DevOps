@@ -30,6 +30,18 @@
         group: "{{ ansible_user }}"
         mode: "0o644"
 
+    - name: Ensure grafana provisioning directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0o755"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      loop:
+        - ./grafana/provisioning/datasources
+        - ./grafana/provisioning/dashboards
+        - ./grafana/dashboards
+
     - name: Копировать provisioning для Grafana datasource
       template:
         src: ansible/templates/grafana-datasource.yml.j2

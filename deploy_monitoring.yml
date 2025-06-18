@@ -38,14 +38,14 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
       loop:
-        - ./grafana/provisioning/datasources
-        - ./grafana/provisioning/dashboards
-        - ./grafana/dashboards
+        - "{{ app_dir }}/grafana/provisioning/datasources"
+        - "{{ app_dir }}/grafana/provisioning/dashboards"
+        - "{{ app_dir }}/grafana/dashboards"
 
     - name: Копировать provisioning для Grafana datasource
       template:
         src: ansible/templates/grafana-datasource.yml.j2
-        dest: ./grafana/provisioning/datasources/prometheus.yml
+        dest: "{{ app_dir }}/grafana/provisioning/datasources/prometheus.yml"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "0o644"
@@ -53,7 +53,7 @@
     - name: Копировать provisioning для Grafana dashboard provider
       template:
         src: ansible/templates/grafana-dashboard-provider.yml.j2
-        dest: ./grafana/provisioning/dashboards/mysql-dashboard.yml
+        dest: "{{ app_dir }}/grafana/provisioning/dashboards/mysql-dashboard.yml"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "0o644"
@@ -61,7 +61,7 @@
     - name: Копировать дашборд MySQL для Grafana
       template:
         src: ansible/templates/grafana-mysql-dashboard.json.j2
-        dest: ./grafana/dashboards/mysql-mysqld-exporter.json
+        dest: "{{ app_dir }}/grafana/dashboards/mysql-mysqld-exporter.json"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "0o644"

@@ -11,46 +11,46 @@
         path: "{{ monitoring_dir }}"
         state: directory
         mode: "0o755"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
 
     - name: Template monitoring docker-compose file
       ansible.builtin.template:
         src: monitoring-docker-compose.yml.j2
         dest: "{{ monitoring_dir }}/docker-compose.yml"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: "0o644"
 
     - name: Template prometheus config
       ansible.builtin.template:
         src: prometheus.yml.j2
         dest: "{{ monitoring_dir }}/prometheus.yml"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: "0o644"
 
     - name: Копировать provisioning для Grafana datasource
       template:
         src: ansible/templates/grafana-datasource.yml.j2
         dest: ./grafana/provisioning/datasources/prometheus.yml
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: "0o644"
 
     - name: Копировать provisioning для Grafana dashboard provider
       template:
         src: ansible/templates/grafana-dashboard-provider.yml.j2
         dest: ./grafana/provisioning/dashboards/mysql-dashboard.yml
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: "0o644"
 
     - name: Копировать дашборд MySQL для Grafana
       template:
         src: ansible/templates/grafana-mysql-dashboard.json.j2
         dest: ./grafana/dashboards/mysql-mysqld-exporter.json
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: "0o644"
  

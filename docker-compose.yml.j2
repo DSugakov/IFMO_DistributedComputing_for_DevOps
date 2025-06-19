@@ -89,9 +89,9 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - {{ app_dir }}/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - {{ app_dir }}/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - {{ app_dir }}/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - wp_network
 

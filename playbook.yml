@@ -181,6 +181,15 @@
         group: "{{ ansible_user }}"
         mode: "0o644"
 
+    - name: Установить права доступа для файлов Grafana
+      ansible.builtin.file:
+        path: "{{ item }}"
+        mode: "0o755"
+        recurse: true
+      loop:
+        - "{{ project_dir }}/grafana/provisioning"
+        - "{{ project_dir }}/grafana/dashboards"
+
     - name: Управление основным Docker Compose стеком
       community.docker.docker_compose_v2:
         project_src: "{{ project_dir }}"

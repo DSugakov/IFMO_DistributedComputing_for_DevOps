@@ -145,6 +145,42 @@
         group: "{{ ansible_user }}"
         mode: "0o644"
 
+    - name: Ensure grafana provisioning directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0o755"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      loop:
+        - "{{ project_dir }}/grafana/provisioning/datasources"
+        - "{{ project_dir }}/grafana/provisioning/dashboards"
+        - "{{ project_dir }}/grafana/dashboards"
+
+    - name: Copy provisioning для Grafana datasource
+      ansible.builtin.template:
+        src: ansible/templates/grafana-datasource.yml.j2
+        dest: "{{ project_dir }}/grafana/provisioning/datasources/prometheus.yml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0o644"
+
+    - name: Copy provisioning для Grafana dashboard provider
+      ansible.builtin.template:
+        src: ansible/templates/grafana-dashboard-provider.yml.j2
+        dest: "{{ project_dir }}/grafana/provisioning/dashboards/mysql-dashboard.yml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0o644"
+
+    - name: Копируем дашборд MySQL для Grafana
+      ansible.builtin.template:
+        src: ansible/templates/grafana-mysql-dashboard.json.j2
+        dest: "{{ project_dir }}/grafana/dashboards/mysql-mysqld-exporter.json"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0o644"
+
     - name: Управление основным Docker Compose стеком
       community.docker.docker_compose_v2:
         project_src: "{{ project_dir }}"

@@ -65,4 +65,11 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "0o644"
+
+    - name: Start monitoring stack
+      community.docker.docker_compose_v2:
+        project_src: "{{ monitoring_dir }}"
+        state: present
+        recreate: always
+      become_user: "{{ ansible_user }}"
  

@@ -32,12 +32,12 @@ ansible-galaxy collection install -r requirements.yml
 2. Настроить inventory файл:
    - Для локального развертывания (на том же сервере):
      ```
-     [wordpress_servers]
+     [app_servers]
      localhost ansible_connection=local
      ```
    - Для удаленного развертывания:
      ```
-     [wordpress_servers]
+     [app_servers]
      target_server ansible_host=<IP-адрес> ansible_user=<пользователь> ansible_ssh_private_key_file=~/.ssh/id_rsa
      ```
 
@@ -46,34 +46,66 @@ ansible-galaxy collection install -r requirements.yml
    - Пользователи WordPress
    - Настройки мониторинга
 
-### 3. Запуск развертывания
+## Варианты запуска
 
-Запустите основной плейбук:
+### Вариант 1: Полное развертывание (рекомендуется)
+
+Запустите основной плейбук для полной настройки системы:
 ```bash
 ansible-playbook playbook.yml -i inventory -K
 ```
-Флаг `-K` запрашивает sudo пароль (требуется только при первом запуске)
 
-Плейбук автоматически:
-- Установит Docker и Docker Compose
-- Создаст необходимые директории
-- Настроит права доступа
-- Создаст конфигурационные файлы
-- Запустит все сервисы в правильном порядке
+Этот плейбук выполнит:
+- Установку Docker и Docker Compose
+- Настройку пользователей и прав доступа
+- Развертывание WordPress с MySQL кластером
+- Настройку системы мониторинга
 
-### 4. Проверка развертывания
+### Вариант 2: Поэтапное развертывание
+
+#### Шаг 1: Развертывание приложения
+```bash
+ansible-playbook deploy_app.yml -i inventory -K
+```
+
+#### Шаг 2: Развертывание мониторинга
+```bash
+ansible-playbook deploy_monitoring.yml -i inventory -K
+```
+
+### Вариант 3: Обновление конфигурации
+
+Для обновления только мониторинга без пересоздания приложения:
+```bash
+ansible-playbook deploy_monitoring.yml -i inventory -K
+```
+
+**Примечание:** Флаг `-K` запрашивает sudo пароль и требуется только при первом запуске или при изменении системных настроек.
+
+## Проверка развертывания
 
 После завершения плейбука проверьте статус контейнеров:
 ```bash
 docker ps
 ```
 
-Все контейнеры должны быть в статусе "Up". Если какие-то контейнеры не запустились, проверьте логи:
+Все контейнеры должны быть в статусе "Up":
+```
+CONTAINER ID   IMAGE                          STATUS
+xxxxxxxxx      bitnami/wordpress:6            Up X hours
+xxxxxxxxx      bitnami/mysql:8.0              Up X hours  
+xxxxxxxxx      prom/mysqld-exporter:v0.14.0   Up X hours
+xxxxxxxxx      grafana/grafana:latest         Up X hours
+xxxxxxxxx      prom/prometheus:latest         Up X hours
+```
+
+Если какие-то контейнеры не запустились, проверьте логи:
 ```bash
 docker logs <container_name>
 ```
 
 ## Доступ к сервисам
+
 После успешного деплоя, сервисы будут доступны по следующим адресам:
 
 - **WordPress**: http://<host>:8080
@@ -81,82 +113,103 @@ docker logs <container_name>
   - Логин: `monadmin` (или значение `monitoring_grafana_user` из vars/main.yml)
   - Пароль: `monpassword` (или значение `monitoring_grafana_password` из vars/main.yml)
 - **Prometheus**: http://<host>:9090
-- **cAdvisor**: http://<host>:8081 (обратите внимание на изменение порта)
+- **MySQL Exporter**: http://<host>:9104
 
-## Подробная инструкция по развертыванию
+## Настройка мониторинга
 
-### 1. Подготовка системы
+### Grafana
+
+После развертывания мониторинга источник данных Prometheus и дашборд MySQL настраиваются автоматически:
+
+- ✅ Источник данных **Prometheus** (URL: http://prometheus:9090)
+- ✅ Дашборд **MySQL Basic (mysqld_exporter)** для мониторинга базы данных
+- ✅ Автоматическое обнаружение метрик MySQL
+
+**Доступные метрики:**
+- MySQL Threads Connected - количество активных подключений
+- MySQL Queries/sec - количество запросов в секунду
+- MySQL Connection Errors - ошибки подключений
+- MySQL Slow Queries - медленные запросы
+
+### Prometheus
+
+Prometheus автоматически собирает метрики с:
+- MySQL Exporter (порт 9104) - метрики базы данных
+- cAdvisor (порт 8080) - метрики контейнеров
+- Node Exporter (если настроен) - метрики системы
+
+## Устранение неполадок
+
+### Проблемы с контейнерами
 ```bash
-# Установка Docker и Docker Compose
-sudo apt-get update
-sudo apt-get install docker.io docker-compose
+# Перезапуск всех сервисов
+cd /home/wordpress/wordpress
+docker compose down
+docker compose up -d
 
-# Создание директорий для данных
-sudo mkdir -p /var/lib/mysql/node{1,2,3}
-sudo mkdir -p /var/lib/wordpress
-sudo chown -R 1001:1001 /var/lib/mysql
-sudo chown -R 1001:1001 /var/lib/wordpress
+# Проверка логов конкретного сервиса
+docker logs wordpress-grafana-1
+docker logs wordpress-prometheus-1
+docker logs wordpress-mysqld_exporter-1
 ```
 
-### 2. Настройка переменных окружения
-Создайте файл `.env` в директории проекта:
+### Проблемы с Grafana
 ```bash
-# MySQL настройки
-MYSQL_ROOT_PASSWORD=your_root_password
-MYSQL_REPLICATION_USER=repl_user
-MYSQL_REPLICATION_PASSWORD=repl_password
+# Проверка provisioning файлов
+docker exec -it wordpress-grafana-1 ls -la /etc/grafana/provisioning/
+docker exec -it wordpress-grafana-1 cat /etc/grafana/provisioning/dashboards/mysql-dashboard.yml
 
-# WordPress настройки
-WORDPRESS_DATABASE_USER=wordpress
-WORDPRESS_DATABASE_PASSWORD=wordpress_password
-WORDPRESS_DATABASE_NAME=wordpress
+# Проверка дашбордов
+docker exec -it wordpress-grafana-1 ls -la /var/lib/grafana/dashboards/
 ```
 
-### 3. Порядок запуска
+### Проблемы с правами доступа
 ```bash
-# Запуск MySQL кластера
-docker-compose up -d node1 node2 node3
-
-# Ожидание инициализации MySQL (30-60 секунд)
-sleep 60
-
-# Запуск WordPress
-docker-compose up -d wordpress
-
-# Запуск компонентов мониторинга
-docker-compose up -d prometheus grafana mysqld_exporter
+# Исправление прав на файлы Grafana
+sudo chown -R 472:472 /opt/wp_app/grafana/
+sudo chmod -R 755 /opt/wp_app/grafana/
 ```
 
-### 4. Проверка работоспособности
+### Переустановка мониторинга
 ```bash
-# Проверка статуса контейнеров
-docker ps
-
-# Проверка логов MySQL
-docker logs wordpress-node1-1
-docker logs wordpress-node2-1
-docker logs wordpress-node3-1
-
-# Проверка логов WordPress
-docker logs wordpress-wordpress-1
+# Полная переустановка мониторинга
+docker compose down
+ansible-playbook deploy_monitoring.yml -i inventory -K
 ```
 
-### 5. Устранение неполадок
-Если контейнеры завершаются с ошибкой:
-1. Проверьте логи контейнера: `docker logs <container_name>`
-2. Убедитесь, что все переменные окружения установлены
-3. Проверьте права доступа к директориям данных
-4. Проверьте, что все порты свободны
+## Архитектура системы
 
-## Настройка Grafana
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   WordPress     │    │   MySQL Cluster  │    │   Monitoring    │
+│   (Port 8080)   │◄──►│   (Ports 3306-   │    │                 │
+│                 │    │    3308)         │    │                 │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                │                        │
+                                ▼                        ▼
+                       ┌──────────────────┐    ┌─────────────────┐
+                       │ MySQL Exporter   │    │   Prometheus    │
+                       │  (Port 9104)     │───►│   (Port 9090)   │
+                       └──────────────────┘    └─────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌─────────────────┐
+                                               │    Grafana      │
+                                               │   (Port 3000)   │
+                                               └─────────────────┘
+```
 
-После развертывания мониторинга с помощью Ansible, источник данных Prometheus и базовый дашборд для MySQL добавляются в Grafana автоматически (через provisioning).
+## Дополнительные возможности
 
-- Источник данных **Prometheus** будет доступен сразу (URL: http://prometheus:9090)
-- Базовый дашборд **MySQL Basic (mysqld_exporter)** появится в списке дашбордов Grafana
+### Масштабирование
+Для добавления новых узлов MySQL отредактируйте `vars/main.yml` и добавьте новые узлы в секцию `cluster_nodes`.
 
-Ручная настройка не требуется!
+### Бэкапы
+Настройте регулярные бэкапы MySQL:
+```bash
+# Пример команды бэкапа
+docker exec wordpress-node1-1 mysqldump -u root -p<password> --all-databases > backup.sql
+```
 
-Если вы хотите добавить дополнительные дашборды:
-1. Войдите в Grafana с учетными данными
-2. Импортируйте нужный дашборд через меню "Dashboards → Import" (например, ID: 893, 1860, 10619)
+### Мониторинг дополнительных метрик
+Добавьте дополнительные exporters в `docker-compose.yml` для мониторинга системных метрик.

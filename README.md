@@ -29,17 +29,37 @@ ansible-galaxy collection install -r requirements.yml
    cd IFMO_DistributedComputing_for_DevOps
    ```
 
-2. Настроить inventory файл:
-   - Для локального развертывания (на том же сервере):
-     ```
+2. **⚠️ ВАЖНО: Настройка inventory файла**
+   
+   Перед запуском любого плейбука обязательно настройте файл `inventory`:
+   
+   - **Для локального развертывания** (на том же сервере):
+     ```ini
+     [wordpress_servers]
+     localhost ansible_connection=local
+
      [app_servers]
      localhost ansible_connection=local
      ```
-   - Для удаленного развертывания:
-     ```
+   
+   - **Для удаленного развертывания**:
+     ```ini
+     [wordpress_servers]
+     your-server-ip ansible_user=your-username
+
      [app_servers]
-     target_server ansible_host=<IP-адрес> ansible_user=<пользователь> ansible_ssh_private_key_file=~/.ssh/id_rsa
+     your-server-ip ansible_user=your-username
      ```
+     
+   **Примеры:**
+   ```ini
+   # Для пользователя ubuntu на сервере 192.168.1.100
+   [wordpress_servers]
+   192.168.1.100 ansible_user=ubuntu
+
+   [app_servers]
+   192.168.1.100 ansible_user=ubuntu
+   ```
 
 3. Настроить переменные в `vars/main.yml`:
    - Пароли MySQL
